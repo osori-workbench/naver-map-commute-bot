@@ -2,11 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from naver_map_commute_bot.app import RouteSummary, build_message, build_slack_payload, extract_route_summary
+from naver_map_commute_bot.app import RouteSummary, build_message, build_slack_payload, extract_route_summary, summarize_route_guides
 
 
 @dataclass(frozen=True)
 class BatchConfig:
+    commute_label: str
     start_name: str
     start: str
     goal_name: str
@@ -23,6 +24,7 @@ class BatchResult:
     message: str
     summary: RouteSummary
     payload: dict
+    via_summary: str
 
 
 def run_batch(*, config: BatchConfig, directions_client, slack_client=None) -> BatchResult:
@@ -35,10 +37,24 @@ def run_batch(*, config: BatchConfig, directions_client, slack_client=None) -> B
         lang=config.language,
     )
     summary = extract_route_summary(response, route_option=config.route_option)
-    message = build_message(start_name=config.start_name, goal_name=config.goal_name, summary=summary)
-    payload = build_slack_payload(start_name=config.start_name, goal_name=config.goal_name, summary=summary)
+    guides = response.get("route", {}).get(config.route_option, [{}])[0].get("guide", [])
+    via_summary = summarize_route_guides(guides)
+    message = build_message(
+        commute_label=config.commute_label,
+        start_name=config.start_name,
+        goal_name=config.goal_name,
+        summary=summary,
+        via_summary=via_summary,
+    )
+    payload = build_slack_payload(
+        commute_label=config.commute_label,
+        start_name=config.start_name,
+        goal_name=config.goal_name,
+        summary=summary,
+        via_summary=via_summary,
+    )
     if config.send_slack:
         if slack_client is None:
             raise ValueError("slack_client is required when send_slack=True")
         slack_client.send(payload)
-    return BatchResult(message=message, summary=summary, payload=payload)
+    return BatchResult(message=message, summary=summary, payload=payload, via_summary=via_summary)

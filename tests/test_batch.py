@@ -40,6 +40,7 @@ def test_run_batch_returns_message_and_sends_slack_payload() -> None:
     )
     slack = StubSlackClient()
     config = BatchConfig(
+        commute_label="오전 출근길",
         start_name="일산 Sphere",
         start="126.77801150878531,37.658031591237425",
         goal_name="수명산 파크",
@@ -54,6 +55,7 @@ def test_run_batch_returns_message_and_sends_slack_payload() -> None:
 
     assert "75분" in result.message
     assert result.summary.fuel_price == 9020
+    assert result.via_summary == ""
     assert directions.calls == [
         {
             "start": "126.77801150878531,37.658031591237425",
@@ -87,6 +89,7 @@ def test_run_batch_skips_slack_when_disabled() -> None:
     )
     slack = StubSlackClient()
     config = BatchConfig(
+        commute_label="오후 퇴근길",
         start_name="A",
         start="1,1",
         goal_name="B",
@@ -121,6 +124,7 @@ def test_run_batch_reads_summary_from_requested_route_option() -> None:
         }
     )
     config = BatchConfig(
+        commute_label="오후 퇴근길",
         start_name="A",
         start="1,1",
         goal_name="B",

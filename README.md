@@ -37,7 +37,9 @@ Slack 전송 시 추가:
 cd /Users/osori/workbench/naver-map-commute-bot
 cp .env.example .env
 # .env 값 입력 후
-export $(grep -v '^#' .env | xargs)
+set -a
+source .env
+set +a
 uv run naver-map-commute-bot
 ```
 
