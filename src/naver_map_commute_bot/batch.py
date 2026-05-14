@@ -12,6 +12,8 @@ class BatchConfig:
     start: str
     goal_name: str
     goal: str
+    title_emoji: str = "🚗"
+    snapshot_time: str = "00:00"
     fuel_type: str = "gasoline"
     mileage: float = 14.0
     route_option: str = "traoptimal"
@@ -40,14 +42,16 @@ def run_batch(*, config: BatchConfig, directions_client, slack_client=None) -> B
     guides = response.get("route", {}).get(config.route_option, [{}])[0].get("guide", [])
     via_summary = summarize_route_guides(guides)
     message = build_message(
-        commute_label=config.commute_label,
+        snapshot_time=config.snapshot_time,
+        title_emoji=config.title_emoji,
         start_name=config.start_name,
         goal_name=config.goal_name,
         summary=summary,
         via_summary=via_summary,
     )
     payload = build_slack_payload(
-        commute_label=config.commute_label,
+        snapshot_time=config.snapshot_time,
+        title_emoji=config.title_emoji,
         start_name=config.start_name,
         goal_name=config.goal_name,
         summary=summary,

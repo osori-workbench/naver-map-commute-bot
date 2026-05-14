@@ -35,7 +35,7 @@ def test_extract_route_summary_reads_eta_distance_and_fuel_price() -> None:
     assert summary.toll_fare == 3200
 
 
-def test_build_message_includes_route_names_eta_and_costs() -> None:
+def test_build_message_includes_timestamped_emoji_title_eta_and_costs() -> None:
     summary = extract_route_summary(
         {
             "route": {
@@ -54,7 +54,8 @@ def test_build_message_includes_route_names_eta_and_costs() -> None:
     )
 
     message = build_message(
-        commute_label="오전 출근길",
+        snapshot_time="08:45",
+        title_emoji="🌅",
         start_name="운정자이 시그니처",
         goal_name="FITI시험연구원",
         summary=summary,
@@ -62,7 +63,7 @@ def test_build_message_includes_route_names_eta_and_costs() -> None:
     )
 
     lines = message.splitlines()
-    assert lines[0] == "오전 출근길 | 운정자이 시그니처 → FITI시험연구원"
+    assert lines[0] == "🌅 08:45 | 운정자이 시그니처 → FITI시험연구원"
     assert "90분" in lines[1]
     assert "10,321원" in lines[1]
     assert "38.5km" in lines[1]
@@ -88,14 +89,15 @@ def test_build_slack_payload_uses_blocks_and_plaintext_fallback() -> None:
     )
 
     payload = build_slack_payload(
-        commute_label="오전 출근길",
+        snapshot_time="08:45",
+        title_emoji="🌅",
         start_name="운정자이 시그니처",
         goal_name="FITI시험연구원",
         summary=summary,
         via_summary="탑골IC → 법곳IC",
     )
 
-    assert payload["text"].startswith("오전 출근길")
+    assert payload["text"].startswith("🌅 08:45")
     assert payload["blocks"][0]["type"] == "section"
     assert "경유: 탑골IC → 법곳IC" in payload["blocks"][0]["text"]["text"]
 
@@ -119,7 +121,8 @@ def test_build_slack_payload_includes_toll_when_present() -> None:
     )
 
     payload = build_slack_payload(
-        commute_label="오후 퇴근길",
+        snapshot_time="17:15",
+        title_emoji="🌆",
         start_name="FITI시험연구원",
         goal_name="운정자이 시그니처",
         summary=summary,

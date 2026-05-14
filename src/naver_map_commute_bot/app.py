@@ -54,7 +54,8 @@ def summarize_route_guides(guides: list[dict], *, limit: int = 3) -> str:
 
 def build_message(
     *,
-    commute_label: str,
+    snapshot_time: str,
+    title_emoji: str,
     start_name: str,
     goal_name: str,
     summary: RouteSummary,
@@ -65,7 +66,7 @@ def build_message(
         cost_line += f" · 통행료 {summary.toll_fare:,}원"
 
     lines = [
-        f"{commute_label} | {start_name} → {goal_name}",
+        f"{title_emoji} {snapshot_time} | {start_name} → {goal_name}",
         cost_line,
     ]
     if via_summary:
@@ -75,14 +76,16 @@ def build_message(
 
 def build_slack_payload(
     *,
-    commute_label: str,
+    snapshot_time: str,
+    title_emoji: str,
     start_name: str,
     goal_name: str,
     summary: RouteSummary,
     via_summary: str = "",
 ) -> dict:
     message = build_message(
-        commute_label=commute_label,
+        snapshot_time=snapshot_time,
+        title_emoji=title_emoji,
         start_name=start_name,
         goal_name=goal_name,
         summary=summary,

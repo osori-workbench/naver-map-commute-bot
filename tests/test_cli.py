@@ -143,7 +143,8 @@ def test_build_config_selects_morning_route_before_noon() -> None:
         now=datetime(2026, 5, 14, 8, 45, tzinfo=ZoneInfo("Asia/Seoul")),
     )
 
-    assert config.commute_label == "오전 출근길"
+    assert config.snapshot_time == "08:45"
+    assert config.title_emoji == "🌅"
     assert config.start_name == "운정자이 시그니처"
     assert config.goal_name == "FITI시험연구원"
     assert config.start == "126.7295793,37.7236352"
@@ -156,7 +157,8 @@ def test_build_config_selects_evening_route_after_noon() -> None:
         now=datetime(2026, 5, 14, 17, 15, tzinfo=ZoneInfo("Asia/Seoul")),
     )
 
-    assert config.commute_label == "오후 퇴근길"
+    assert config.snapshot_time == "17:15"
+    assert config.title_emoji == "🌆"
     assert config.start_name == "FITI시험연구원"
     assert config.goal_name == "운정자이 시그니처"
     assert config.start == "126.8385696,37.5684853"
@@ -170,6 +172,7 @@ def test_build_config_respects_explicit_route_mode_over_current_time() -> None:
         mode="morning",
     )
 
-    assert config.commute_label == "오전 출근길"
+    assert config.snapshot_time == "17:15"
+    assert config.title_emoji == "🌅"
     assert config.start_name == "운정자이 시그니처"
     assert config.goal_name == "FITI시험연구원"

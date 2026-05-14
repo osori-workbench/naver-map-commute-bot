@@ -17,6 +17,7 @@ KST = ZoneInfo("Asia/Seoul")
 
 MORNING_ROUTE = {
     "commute_label": "오전 출근길",
+    "title_emoji": "🌅",
     "start_name": "운정자이 시그니처",
     "start": "126.7295793,37.7236352",
     "goal_name": "FITI시험연구원",
@@ -25,6 +26,7 @@ MORNING_ROUTE = {
 
 EVENING_ROUTE = {
     "commute_label": "오후 퇴근길",
+    "title_emoji": "🌆",
     "start_name": "FITI시험연구원",
     "start": "126.8385696,37.5684853",
     "goal_name": "운정자이 시그니처",
@@ -61,6 +63,8 @@ def build_config(*, send_slack: bool, now: datetime | None = None, mode: str | N
         start=route["start"],
         goal_name=route["goal_name"],
         goal=route["goal"],
+        title_emoji=route["title_emoji"],
+        snapshot_time=current.strftime("%H:%M"),
         fuel_type=os.environ.get("ROUTE_FUEL_TYPE", "gasoline"),
         mileage=mileage,
         route_option=os.environ.get("ROUTE_OPTION", "traoptimal"),
