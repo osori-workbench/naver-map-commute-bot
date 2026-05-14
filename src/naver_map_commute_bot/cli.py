@@ -35,6 +35,7 @@ EVENING_ROUTE = {
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="NAVER Maps commute batch")
     parser.add_argument("--send", action="store_true", help="Send the result to Slack webhook")
+    parser.add_argument("--mode", choices=["morning", "evening"], help="Override route direction")
     return parser
 
 
@@ -42,7 +43,7 @@ class ConfigError(ValueError):
     pass
 
 
-def build_config(*, send_slack: bool, now: datetime | None = None) -> BatchConfig:
+def build_config(*, send_slack: bool, now: datetime | None = None, mode: str | None = None) -> BatchConfig:
     try:
         mileage = float(os.environ.get("ROUTE_MILEAGE", "14"))
     except ValueError as exc:
@@ -51,7 +52,8 @@ def build_config(*, send_slack: bool, now: datetime | None = None) -> BatchConfi
         raise ConfigError("ROUTE_MILEAGE must be a positive number")
 
     current = now.astimezone(KST) if now else datetime.now(tz=KST)
-    route = MORNING_ROUTE if current.hour < 12 else EVENING_ROUTE
+    selected_mode = mode or ("morning" if current.hour < 12 else "evening")
+    route = MORNING_ROUTE if selected_mode == "morning" else EVENING_ROUTE
 
     return BatchConfig(
         commute_label=route["commute_label"],
@@ -70,7 +72,7 @@ def build_config(*, send_slack: bool, now: datetime | None = None) -> BatchConfi
 def main(argv: list[str] | None = None) -> None:
     try:
         args = build_parser().parse_args(argv)
-        config = build_config(send_slack=args.send)
+        config = build_config(send_slack=args.send, mode=args.mode)
         api_key_id = os.environ["NAVER_MAP_API_KEY_ID"]
         api_key = os.environ["NAVER_MAP_API_KEY"]
         slack_webhook_url = os.environ.get("SLACK_WEBHOOK_URL") if args.send else None

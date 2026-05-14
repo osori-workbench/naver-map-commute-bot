@@ -8,11 +8,12 @@ NAVER Maps 현행 `map-direction/v1/driving` API를 사용해 출발지→도착
 - 결과: 웹앱 없이도 로컬 cron/launchd/GitHub Actions 어디서든 바로 실행 가능
 
 ## 기본 동작
-- 기본 출발지: `일산 Sphere` (`126.77801150878531,37.658031591237425`)
-- 기본 도착지: `수명산 파크` (`126.82325269403174,37.55138140215686`)
+- 오전(08:45 실행): `운정자이 시그니처` → `FITI시험연구원`
+- 오후(17:15 실행): `FITI시험연구원` → `운정자이 시그니처`
 - 기본 경로 옵션: `traoptimal`
 - 기본 연료 타입: `gasoline`
 - 기본 연비: `14km/L`
+- Slack 메시지는 2~3줄 요약으로 전송
 
 ## 환경변수
 필수:
@@ -40,12 +41,12 @@ cp .env.example .env
 set -a
 source .env
 set +a
-uv run naver-map-commute-bot
+PYTHONPATH=src .venv/bin/python -m naver_map_commute_bot
 ```
 
 Slack까지 보내려면:
 ```bash
-uv run naver-map-commute-bot --send
+PYTHONPATH=src .venv/bin/python -m naver_map_commute_bot --send
 ```
 
 ## 예시 출력
@@ -58,5 +59,23 @@ uv run naver-map-commute-bot --send
 uv run --group dev pytest tests/ -q
 ```
 
-## 크론 등록은 보류
-사용자 요청대로 크론/launchd 등록은 아직 하지 않았고, 배치 실행 커맨드만 준비했습니다.
+## launchd 등록
+설치 스크립트:
+```bash
+./scripts/install_launchd.sh
+```
+
+실행 wrapper:
+```bash
+./scripts/run_commute_batch.sh morning
+./scripts/run_commute_batch.sh evening
+```
+
+등록되는 LaunchAgent:
+- `com.osori.naver-map-commute-bot.morning` → 매일 `08:45`
+- `com.osori.naver-map-commute-bot.evening` → 매일 `17:15`
+
+로그 파일:
+- `logs/launchd.log`
+- `logs/launchd.stdout.log`
+- `logs/launchd.stderr.log`
